@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:wheather_app/data/image_path.dart';
+import 'package:wheather_app/services/location_provider.dart';
 import 'package:wheather_app/utils/apptext.dart';
 
 import '../utils/custom_divider_page.dart';
@@ -12,10 +14,18 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  bool _isClicked=false;
+  bool _isClicked = false;
+  @override
+  void initState() {
+    // TODO: implement initState
+    Provider.of<LocationProvider>(context, listen: false).determinePosition();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
+    final locationprovider = Provider.of<LocationProvider>(context);
     return Scaffold(
       extendBodyBehindAppBar: true,
       backgroundColor: Colors.black,
@@ -31,67 +41,75 @@ class _HomePageState extends State<HomePage> {
             image: DecorationImage(
                 fit: BoxFit.cover, image: AssetImage(background[0]))),
         child: Stack(children: [
-          _isClicked==true?Positioned(
-            top: 60,
-            left: 20,
-            right: 20,
-            child: Container(
-              height: 45,
-              child: TextFormField(
-                decoration: InputDecoration(
-                    enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white)),
-                    focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white))),
-              ),
-            ),
-          ):SizedBox(),
+          _isClicked == true
+              ? Positioned(
+                  top: 90,
+                  left: 20,
+                  right: 20,
+                  child: Container(
+                    color: Colors.red,
+                    height: 45,
+                    child: TextFormField(
+                      decoration: InputDecoration(
+                          enabledBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.white)),
+                          focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.white))),
+                    ),
+                  ),
+                )
+              : SizedBox.shrink(),
           Container(
             height: 60,
-            child: Container(
-                child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                  Container(
-                    child: Row(children: [
-                      Icon(
-                        Icons.location_pin,
-                        color: Colors.red,
-                      ),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          AppText(
-                            data: "Dubai",
-                            size: 18,
-                            fw: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                          AppText(
-                            data: "Good Morning",
-                            size: 14,
-                            fw: FontWeight.bold,
-                            color: Colors.white,
-                          )
-                        ],
-                      ),
-                    ]),
-                  ),
-                  IconButton(
-                      onPressed: () {
-                        setState(() {
-                          _isClicked=!_isClicked;
-                        });
-                      },
-                      icon: Icon(
-                        Icons.search,
-                        size: 32,
-                      ))
-                ])),
+            child: Consumer<LocationProvider>(
+              builder: (context, locationprovider, child) => Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      child: Row(children: [
+                        Icon(
+                          Icons.location_pin,
+                          color: Colors.red,
+                        ),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            AppText(
+                              data: locationprovider
+                                      .currentLocationName!.locality!.isEmpty
+                                  ? "Unknown location"
+                                  : locationprovider
+                                      .currentLocationName!.locality,
+                              size: 18,
+                              fw: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                            AppText(
+                              data: "Good Morning",
+                              size: 14,
+                              fw: FontWeight.bold,
+                              color: Colors.white,
+                            )
+                          ],
+                        ),
+                      ]),
+                    ),
+                    IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _isClicked = !_isClicked;
+                          });
+                        },
+                        icon: Icon(
+                          Icons.search,
+                          size: 32,
+                        ))
+                  ]),
+            ),
           ),
           Align(
               alignment: Alignment(0, -0.7),
